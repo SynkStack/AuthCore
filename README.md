@@ -48,6 +48,8 @@ npm start       # production
 | GET | /health | Service health check |
 | POST | /auth/signup | Create an account |
 | POST | /auth/login | Log in and receive an access token |
+| GET | /me | Current user's profile (needs token) |
+| GET | /admin/users | List users (admin only) |
 
 ### POST /auth/signup
 
@@ -74,12 +76,27 @@ Body: `{ "email": "...", "password": "..." }`
 
 Use the token on protected routes with the header `Authorization: Bearer <accessToken>`.
 
+### Protected routes and roles
+
+Send the token as `Authorization: Bearer <accessToken>`.
+
+| Status | Meaning |
+|--------|---------|
+| 401 | Missing, invalid or expired token |
+| 403 | Logged in, but the role is not allowed |
+
+Roles: `member` (default for every signup) and `admin`. There is no endpoint to become an admin. Promote a user in the database:
+
+    UPDATE users SET role='admin' WHERE email='you@example.com';
+
+The role is stored inside the access token, so log in again after a role change.
+
 ## Roadmap
 
 - [x] Project setup and health endpoint
 - [x] Database and signup
 - [x] Login with JWT
-- [ ] Protected routes and roles
+- [x] Protected routes and roles
 - [ ] Refresh tokens and logout
 - [ ] Tests and CI
 - [ ] Docker and API docs
