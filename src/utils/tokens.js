@@ -1,5 +1,6 @@
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const { jwtAccessSecret, jwtAccessExpiresIn } = require('../config/env');
+const { jwtAccessSecret, jwtAccessExpiresIn, refreshTokenDays } = require('../config/env');
 
 // Payload holds only what other services need. Never put passwords here: JWTs are readable.
 function signAccessToken(user) {
@@ -15,4 +16,17 @@ function verifyAccessToken(token) {
   return jwt.verify(token, jwtAccessSecret, { algorithms: ['HS256'] });
 }
 
-module.exports = { signAccessToken, verifyAccessToken };
+// SHA-256 is fine here (not for passwords): the token is 48 random bytes, so it can't be guessed.
+function hashToken(token) {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+// "token" goes to the client. Only "tokenHash" is stored in the database.
+function generateRefreshToken() {
+  const token = crypto.randomBytes(48).toString('hex');
+  const tokenHash = hashToken(token);
+  const expiresAt = new Date(Date.now() + refreshTokenDays * 24 * 60 * 60 * 1000);
+  return { token, tokenHash, expiresAt };
+}
+
+module.exports = { signAccessToken, verifyAccessToken, hashToken, generateRefreshToken };
