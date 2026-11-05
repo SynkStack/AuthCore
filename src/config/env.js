@@ -1,8 +1,9 @@
-// Loads .env into process.env, then exports settings in one place.
 require('dotenv').config();
 
 module.exports = {
   port: process.env.PORT || 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
   databaseUrl: process.env.DATABASE_URL,
+  jwtAccessSecret: process.env.JWT_ACCESS_SECRET,
+  jwtAccessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
 };

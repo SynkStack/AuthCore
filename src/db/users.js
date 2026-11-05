@@ -11,4 +11,10 @@ async function createUser({ email, passwordHash, name }) {
   return rows[0];
 }
 
-module.exports = { createUser };
+// Returns the full row INCLUDING password_hash. Only use it inside login logic.
+async function findByEmail(email) {
+  const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+  return rows[0] || null;
+}
+
+module.exports = { createUser, findByEmail };
