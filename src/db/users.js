@@ -26,4 +26,12 @@ async function findById(id) {
   return rows[0] || null;
 }
 
-module.exports = { createUser, findByEmail, findById };
+// Safe list for admins: no password_hash. Capped at 100 for now.
+async function findAll() {
+  const { rows } = await pool.query(
+    'SELECT id, email, name, role, created_at FROM users ORDER BY created_at LIMIT 100'
+  );
+  return rows;
+}
+
+module.exports = { createUser, findByEmail, findById, findAll };

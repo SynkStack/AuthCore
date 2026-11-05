@@ -1,4 +1,4 @@
-const { findById } = require('../db/users');
+const { findById, findAll } = require('../db/users');
 
 async function me(req, res) {
   // req.user comes from the authenticate middleware. We reload from the DB
@@ -10,4 +10,9 @@ async function me(req, res) {
   return res.json({ user });
 }
 
-module.exports = { me };
+async function listUsers(req, res) {
+  const users = await findAll();
+  return res.json({ users });
+}
+
+module.exports = { me, listUsers };
