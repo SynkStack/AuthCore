@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const { createUser, findByEmail } = require('../db/users');
-const { signAccessToken } = require('../utils/tokens');
+const { signAccessToken, generateRefreshToken } = require('../utils/tokens');
+const { saveRefreshToken } = require('../db/refreshTokens');
 
 const BCRYPT_ROUNDS = 12; // cost factor: higher = slower = safer
 
@@ -37,8 +38,14 @@ async function login(req, res) {
   }
 
   const accessToken = signAccessToken(user);
+
+  // A new refresh token for this login. Only its hash is stored.
+  const { token: refreshToken, tokenHash, expiresAt } = generateRefreshToken();
+  await saveRefreshToken({ userId: user.id, tokenHash, expiresAt });
+
   return res.json({
     accessToken,
+    refreshToken,
     tokenType: 'Bearer',
     user: { id: user.id, email: user.email, name: user.name, role: user.role },
   });
