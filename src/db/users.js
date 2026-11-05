@@ -17,4 +17,13 @@ async function findByEmail(email) {
   return rows[0] || null;
 }
 
-module.exports = { createUser, findByEmail };
+// Safe lookup for profile data: no password_hash.
+async function findById(id) {
+  const { rows } = await pool.query(
+    'SELECT id, email, name, role, created_at FROM users WHERE id = $1',
+    [id]
+  );
+  return rows[0] || null;
+}
+
+module.exports = { createUser, findByEmail, findById };
