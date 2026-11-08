@@ -1,5 +1,6 @@
 # AuthCore
 
+![CI](https://github.com/SynkStack/AuthCore/actions/workflows/ci.yml/badge.svg)
 Authentication service for NovaStack Technologies. A REST API that other services use for signup, login and token-based access.
 
 ## Requirements
@@ -41,6 +42,8 @@ npm start       # production
 | JWT_ACCESS_SECRET | Secret used to sign access tokens (keep private) |
 | JWT_ACCESS_EXPIRES_IN | Access token lifetime (default 15m) |
 | REFRESH_TOKEN_DAYS | Refresh token lifetime in days (default 7) |
+| LOGIN_RATE_LIMIT | Max failed logins per IP per 15 minutes (default 10) |
+| TEST_DATABASE_URL | Database used by tests. The name must end with _test |
 
 ## Endpoints
 
@@ -107,6 +110,19 @@ Roles: `member` (default for every signup) and `admin`. There is no endpoint to 
 
 The role is stored inside the access token, so log in again after a role change.
 
+## Testing
+
+Tests use a separate database, so your dev data is never touched. Create it once:
+
+    docker compose exec db psql -U authcore -d authcore -c "CREATE DATABASE authcore_test;"
+
+Then:
+
+    npm test                # run all tests
+    npm run test:coverage   # also print coverage; fails below 80%
+
+GitHub Actions runs the same tests with a Postgres service container on every push to main and every pull request.
+
 ## Roadmap
 
 - [x] Project setup and health endpoint
@@ -114,5 +130,5 @@ The role is stored inside the access token, so log in again after a role change.
 - [x] Login with JWT
 - [x] Protected routes and roles
 - [x] Refresh tokens and logout
-- [ ] Tests and CI
+- [x] Tests and CI
 - [ ] Docker and API docs
