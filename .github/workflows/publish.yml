@@ -1,0 +1,31 @@
+name: Publish image
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write   # create the GitHub Release
+  packages: write   # push to ghcr.io
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and push image
+        env:
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          IMAGE=ghcr.io/$(echo "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')/authcore
+          VERSION=${GITHUB_REF_NAME#v}
+          echo "$REGISTRY_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker build -t "$IMAGE:$VERSION" -t "$IMAGE:latest" .
+          docker push "$IMAGE:$VERSION"
+          docker push "$IMAGE:latest"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes

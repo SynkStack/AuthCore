@@ -53,3 +53,26 @@ jobs:
         with:
           name: coverage
           path: coverage/
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: test # only runs if the tests passed
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t authcore:ci .
+
+      - name: Smoke test the image
+        run: |
+          docker run -d --name authcore-smoke -p 3000:3000 \
+            -e DATABASE_URL=postgres://unused:unused@localhost:5432/unused \
+            -e JWT_ACCESS_SECRET=ci-smoke-secret \
+            authcore:ci
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:3000/health && exit 0
+            sleep 1
+          done
+          docker logs authcore-smoke
+          exit 1
