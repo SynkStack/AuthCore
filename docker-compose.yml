@@ -30,7 +30,7 @@ services:
     depends_on:
       db:
         condition: service_healthy   # wait until Postgres is ready
-    command: sh -c "node src/db/migrate.js && node src/server.js"
+    command: sh -c "node src/db/migrate.js && exec node src/server.js"
 
 volumes:
   authcore-data:
