@@ -10,5 +10,27 @@ services:
       - "5432:5432"
     volumes:
       - authcore-data:/var/lib/postgresql/data   # keeps data after restarts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    container_name: authcore-api
+    env_file: .env
+    environment:
+      # Inside Docker's network the database host is the service name "db", not localhost.
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      # "environment" beats env_file, so this overrides NODE_ENV=development from .env.
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy   # wait until Postgres is ready
+    command: sh -c "node src/db/migrate.js && node src/server.js"
+
 volumes:
   authcore-data:
