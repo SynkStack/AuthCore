@@ -23,5 +23,12 @@ async function revokeToken(id) {
 async function revokeAllForUser(userId) {
   await pool.query('UPDATE refresh_tokens SET revoked = true WHERE user_id = $1', [userId]);
 }
-
-module.exports = { saveRefreshToken, findByTokenHash, revokeToken, revokeAllForUser };
+// Revokes the token only if it is still active. Returns true if THIS call revoked it.
+async function consumeToken(id) {
+  const { rowCount } = await pool.query(
+    'UPDATE refresh_tokens SET revoked = true WHERE id = $1 AND revoked = false',
+    [id]
+  );
+  return rowCount === 1;
+}
+module.exports = { saveRefreshToken, findByTokenHash, revokeToken, revokeAllForUser, consumeToken };
