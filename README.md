@@ -40,6 +40,7 @@ npm start       # production
 | DATABASE_URL | Connection string used by the app |
 | JWT_ACCESS_SECRET | Secret used to sign access tokens (keep private) |
 | JWT_ACCESS_EXPIRES_IN | Access token lifetime (default 15m) |
+| REFRESH_TOKEN_DAYS | Refresh token lifetime in days (default 7) |
 
 ## Endpoints
 
@@ -50,6 +51,8 @@ npm start       # production
 | POST | /auth/login | Log in and receive an access token |
 | GET | /me | Current user's profile (needs token) |
 | GET | /admin/users | List users (admin only) |
+| POST | /auth/refresh | Exchange a refresh token for new tokens |
+| POST | /auth/logout | Revoke a refresh token |
 
 ### POST /auth/signup
 
@@ -69,12 +72,25 @@ Body: `{ "email": "...", "password": "..." }`
 
 | Status | Meaning |
 |--------|---------|
-| 200 | Returns `accessToken` (JWT, 15 min), `tokenType` and the user |
+| 200 | Returns `accessToken` (JWT, 15 min), refreshToken (7 days), `tokenType` and the user |
 | 400 | Invalid input |
 | 401 | Invalid email or password (same message for both) |
 | 429 | Too many failed attempts (10 per 15 minutes per IP) |
 
 Use the token on protected routes with the header `Authorization: Bearer <accessToken>`.
+
+### Refresh tokens and logout
+
+POST /auth/refresh and POST /auth/logout both take the body `{ "refreshToken": "..." }`.
+
+| Endpoint | Status | Meaning |
+|----------|--------|---------|
+| /auth/refresh | 200 | New accessToken and a NEW refreshToken (the old one is revoked) |
+| /auth/refresh | 401 | Unknown, expired or already used token |
+| /auth/logout | 204 | Token revoked (also returned for unknown tokens) |
+| both | 400 | Invalid input |
+
+Refresh tokens are random strings, and only their SHA-256 hash is stored in the database. Each token works once (rotation). Presenting an already used token revokes all of that user's refresh tokens, because it may have been stolen.
 
 ### Protected routes and roles
 
@@ -97,6 +113,6 @@ The role is stored inside the access token, so log in again after a role change.
 - [x] Database and signup
 - [x] Login with JWT
 - [x] Protected routes and roles
-- [ ] Refresh tokens and logout
+- [x] Refresh tokens and logout
 - [ ] Tests and CI
 - [ ] Docker and API docs

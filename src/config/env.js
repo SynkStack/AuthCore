@@ -6,4 +6,6 @@ module.exports = {
   databaseUrl: process.env.DATABASE_URL,
   jwtAccessSecret: process.env.JWT_ACCESS_SECRET,
   jwtAccessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
+  refreshTokenDays: Number(process.env.REFRESH_TOKEN_DAYS) || 7,
+  
 };
