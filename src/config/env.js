@@ -7,5 +7,5 @@ module.exports = {
   jwtAccessSecret: process.env.JWT_ACCESS_SECRET,
   jwtAccessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
   refreshTokenDays: Number(process.env.REFRESH_TOKEN_DAYS) || 7,
-  
+  loginRateLimit: Number(process.env.LOGIN_RATE_LIMIT) || 10,
 };

@@ -14,4 +14,5 @@ if (!/_test(\?.*)?$/.test(testUrl)) {
 process.env.NODE_ENV = 'test';
 process.env.DATABASE_URL = testUrl; // the app now talks to the test database
 process.env.JWT_ACCESS_SECRET =
-  process.env.JWT_ACCESS_SECRET || 'test-only-secret-not-for-production';
+process.env.JWT_ACCESS_SECRET || 'test-only-secret-not-for-production';
+process.env.LOGIN_RATE_LIMIT = '5'; // small limit so the rate-limit test is quick
