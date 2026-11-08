@@ -5,6 +5,7 @@ const {
   saveRefreshToken,
   findByTokenHash,
   consumeToken,
+  revokeToken,
   revokeAllForUser,
 } = require('../db/refreshTokens');
 
@@ -82,5 +83,14 @@ async function refresh(req, res) {
   const tokens = await issueTokens(user);
   return res.json({ ...tokens, tokenType: 'Bearer' });
 }
+async function logout(req, res) {
+  const { refreshToken } = req.body;
+  const stored = await findByTokenHash(hashToken(refreshToken));
+  if (stored && !stored.revoked) {
+    await revokeToken(stored.id);
+  }
+  // Always 204: don't reveal whether the token existed.
+  return res.status(204).send();
+}
 
-module.exports = { signup, login, refresh };
+module.exports = { signup, login, refresh, logout };
